@@ -1,0 +1,25 @@
+[package]
+name = "Xen"
+version = "0.1.0"
+authors = ["Vishesh Choudhary <vishachoudhary@gmail.com>"]
+edition = "2018"
+description = "Extended Introductory Website."
+repository = "https://github.com/visheshc14/Xen"
+homepage = "https://github.com/visheshc14/Xen"
+license = "MIT"
+keywords = ["cms", "website", "blog", "web"]
+readme = "README.md"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+rocket = "0.4.10"
+askama = { version = "0.10.5", features = ["with-rocket"] }
+askama_rocket = "0.10.0"
+rocket_contrib = { version = "0.4.10", default-features = false, features = ["serve"] }
+rust-embed = { version = "5.9.0", features = ["debug-embed"] }
+chrono = "0.4.19"
+comrak = { git = "https://github.com/SphericalKat/comrak", branch = "master" }
+syntect = { version = "4.5.0", default-features = false, features = ["default-fancy"] }
+rustc_version_runtime = "0.2.0"
+lazy_static = "1.4.0"

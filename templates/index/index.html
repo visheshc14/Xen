@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="shortcut icon" href="/static/favicon.ico" type="image/png">
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+  <link
+    href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="/static/tailwind.generated.css">
+  <link rel="stylesheet" href="/static/main.generated.css">
+  <link rel="manifest" href="/static/manifest.json">
+
+	
+	<!-- opengraph tags -->
+	<meta property="og:image" content="https://og-image.vercel.app/{{ title }}.png" />
+	<meta property="og:image:width" content="1200">
+	<meta property="og:image:height" content="600">
+	<meta property="og:site_name" content="VisheshChoudhary">
+	<meta property="og:type" content="object">
+	<meta property="og:title" content="{{ title }}">
+	<meta property="og:url" content="https://visheshchoudhary.me">
+	<meta property="og:description" content="Vishesh Choudhary's personal portfolio site, built with Rust.">
+
+  <title>{{ title }}</title>
+</head>
+
+<body>
+  <div class="flex flex-col max-w-5xl m-auto h-full p-6">
+    {% include "header.html" %}
+
+		<div class="col-span-3 mt-6 sm:m-0">
+			<h1>Vishesh Choudhary</h1>
+			<hr class="m-0">
+
+			<h2 class="mt-4">Skills</h2>
+			<ul class="mt-2">
+				<li>Kotlin/Java, Rust, Go, JS/TS, Python, Clojure, C, C++ and other languages</li>
+				<li>React, Vue</li>
+				<li>Node.JS, Flask, FastAPI and other web frameworks</li>
+				<li>Native Android, Flutter, React Native</li>
+				<li>Docker</li>
+				<li>Kubernetes</li>
+				<li>TensorFlow</li>
+			</ul>
+
+			<h2 class="mt-6">Highlighted Projects</h2>
+			<ul class="mt-2">
+				<li><a href="https://github.com/visheshc14/Electric-Funeral">Electric Funeral</a> - A Combination of Software Defined Network (SDN) And A Multi-Layer Perceptron (MLP) Neural Network That Results In The Mitigation of DDoS Attacks.</li>
+		
+			</ul>
+
+			<h2 class="mt-8">Quick links</h2>
+			<ul class="mt-2">
+				<li><a href="https://github.com/visheshc14">GitHub</a></li>
+				<li><a href="https://www.linkedin.com/in/vishesh-choudhary">LinkedIn</a></li>
+			</ul>
+		</div>
+		
+    {% include "footer.html" %}
+  </div>
+</body>
+
+</html>
