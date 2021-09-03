@@ -1,8 +1,9 @@
 FROM rustlang/rust:nightly AS builder
 
+WORKDIR /app
+
 RUN rustup target add x86_64-unknown-linux-musl --toolchain=nightly
 
-WORKDIR /app
 
 RUN curl -sL https://deb.nodesource.com/setup_14.x | bash -
 
