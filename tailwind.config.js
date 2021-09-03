@@ -12,7 +12,7 @@ module.exports = {
 
       colors: {
         'selected-grey': '#8f93a2',
-        'amber': '#ffcb6b',
+        'lavender': '#c4b5fd',
       }
     },
   },
