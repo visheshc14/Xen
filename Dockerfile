@@ -19,6 +19,8 @@ COPY . .
 
 RUN yarn build
 
+BREW install filosottile/musl-cross/musl-cross
+
 RUN cargo install --target x86_64-unknown-linux-musl --path .
 
 FROM scratch

@@ -19,7 +19,7 @@ askama_rocket = "0.10.0"
 rocket_contrib = { version = "0.4.10", default-features = false, features = ["serve"] }
 rust-embed = { version = "5.9.0", features = ["debug-embed"] }
 chrono = "0.4.19"
-comrak = "0.12.0"
+comrak = "0.10.0"
 syntect = { version = "4.5.0", default-features = false, features = ["default-fancy"] }
 rustc_version_runtime = "0.2.0"
 lazy_static = "1.4.0"
