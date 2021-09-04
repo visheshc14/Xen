@@ -6,6 +6,7 @@
   "repository": "https://github.com/visheshc14/Xen",
   "author": "Vishesh Choudhary <vishachoudhary@gmail.com>",
   "license": "MIT",
+  "private": true,
   "devDependencies": {
     "@fullhuman/postcss-purgecss": "^4.0.3",
     "autoprefixer": "^10.3.4",
