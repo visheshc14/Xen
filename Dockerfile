@@ -4,7 +4,6 @@ WORKDIR /app
 
 RUN rustup target add x86_64-unknown-linux-musl --toolchain=nightly
 
-
 RUN curl -sL https://deb.nodesource.com/setup_14.x | bash -
 
 RUN apt -y install nodejs
@@ -18,8 +17,6 @@ RUN yarn install
 COPY . .
 
 RUN yarn build
-
-BREW install filosottile/musl-cross/musl-cross
 
 RUN cargo install --target x86_64-unknown-linux-musl --path .
 
