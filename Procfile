@@ -1,0 +1,1 @@
+web: ROCKET_PORT=8000 ./target/debug/Xen
