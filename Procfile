@@ -1,1 +1,1 @@
-web: ROCKET_PORT=8000 ./target/debug/Xen
+web: ROCKET_PORT=$PORT ROCKET_KEEP_ALIVE=0 ./target/release/Xen
