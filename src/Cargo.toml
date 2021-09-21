@@ -4,7 +4,7 @@ version = "0.1.0"
 authors = ["Vishesh Choudhary <vishachoudhary@gmail.com>"]
 description = "Simple Multimedia Player Add-On"
 license = "MIT"
-repository = "https://github.com/vishesh/c14"
+repository = "https://github.com/visheshc14/"
 keywords = ["player","rust-lang","sdl2"]
 
 [dependencies]
