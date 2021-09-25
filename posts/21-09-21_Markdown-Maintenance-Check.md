@@ -1,6 +1,6 @@
 
 # Markdown Maintenance Check
-Random `JAVA` Code README `RENDER CHECK`
+Random `JAVA` Code README `RENDER` CHECK
 > Will Write A Blog Soon!
 ```java
 package com.vishesh;
@@ -249,5 +249,5 @@ public class Board extends JPanel implements ActionListener {
     }
 }
 ```
-> Sample Snake Game Written in Java.
+> Moonlight Rendezvous.
 
