@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.23 (MiKTeX 21.8) (preloaded format=pdflatex 2021.9.1)  1 OCT 2021 22:13
+This is pdfTeX, Version 3.141592653-2.6-1.40.23 (MiKTeX 21.8) (preloaded format=pdflatex 2021.9.1)  2 OCT 2021 23:46
 entering extended mode
 **./resume.tex
 (resume.tex
@@ -606,14 +606,24 @@ Underfull \hbox (badness 10000) in paragraph at lines 25--25
 
 [1
 
-{C:/Users/visha/AppData/Local/MiKTeX/pdftex/config/pdftex.map}] [2]
-(resume.aux)
+{C:/Users/visha/AppData/Local/MiKTeX/pdftex/config/pdftex.map}]
+! Misplaced alignment tab character &.
+l.82 ...ionality Built With Godot Engine, Elixir &
+                                                   Docker. \textit{April 202...
+I can't figure out why you would want to use a tab mark
+here. If you just want an ampersand, the remedy is
+simple: Just type `I\&' now. But if some right brace
+up above has ended a previous alignment prematurely,
+you're probably due for more error messages, and you
+might try typing `S' now just to see what is salvageable.
+
+[2] (resume.aux)
 Package rerunfilecheck Info: File `resume.out' has not changed.
 (rerunfilecheck)             Checksum: D41D8CD98F00B204E9800998ECF8427E;0.
  ) 
 Here is how much of TeX's memory you used:
  11614 strings out of 478927
- 175264 string characters out of 2852536
+ 175432 string characters out of 2852536
  521245 words of memory out of 3000000
  29323 multiletter control sequences out of 15000+600000
  405939 words of font info for 35 fonts, out of 8000000 for 9000
@@ -631,7 +641,7 @@ rs/visha/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr12.pfb
 ><C:/Users/visha/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/c
 mr7.pfb><C:/Users/visha/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfon
 ts/cm/cmti10.pfb>
-Output written on resume.pdf (2 pages, 122829 bytes).
+Output written on resume.pdf (2 pages, 123344 bytes).
 PDF statistics:
  64 PDF objects out of 1000 (max. 8388607)
  3 named destinations out of 1000 (max. 500000)
