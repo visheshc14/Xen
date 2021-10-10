@@ -1,11 +1,11 @@
 all: clean doc move
 
 clean:
-	$(RM) Resume.aux Resume.log Resume.out Resume.pdf
+	$(RM) resume.aux resume.log resume.out resume.pdf
 
 
 doc:
-	pdflatex Resume.tex
+	pdflatex resume.tex
 
 move:
-	mv Resume.pdf ../
+	mv resume.pdf ../
