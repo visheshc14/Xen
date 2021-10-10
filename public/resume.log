@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.23 (MiKTeX 21.8) (preloaded format=pdflatex 2021.9.1)  2 OCT 2021 23:46
+This is pdfTeX, Version 3.141592653-2.6-1.40.23 (MiKTeX 21.8) (preloaded format=pdflatex 2021.9.1)  10 OCT 2021 13:40
 entering extended mode
 **./resume.tex
 (resume.tex
@@ -454,11 +454,6 @@ Underfull \hbox (badness 10000) in paragraph at lines 16--16
 []|\OT1/cmr/bx/n/10 Bachelor of Ap-plied Sci-ence (Hons.)
  []
 
-
-Underfull \hbox (badness 2393) in paragraph at lines 16--16
-[]|\OT1/cmr/m/n/10 Institute For Ex-cel-lence
- []
-
 ! Extra alignment tab has been changed to \cr.
 <recently read> \endtemplate 
                              
@@ -641,7 +636,7 @@ rs/visha/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr12.pfb
 ><C:/Users/visha/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/c
 mr7.pfb><C:/Users/visha/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfon
 ts/cm/cmti10.pfb>
-Output written on resume.pdf (2 pages, 123344 bytes).
+Output written on resume.pdf (2 pages, 123342 bytes).
 PDF statistics:
  64 PDF objects out of 1000 (max. 8388607)
  3 named destinations out of 1000 (max. 500000)
