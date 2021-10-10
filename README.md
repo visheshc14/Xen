@@ -2,11 +2,8 @@
 
 Personal/Portfolio Website of Vishesh Choudhary Made Using Rust, Rocket, Docker, Javascript (Technically No-Javascript), HTML, Tailwind CSS, TeX & MakeFile. CMS for Serving My Website and Personal Blogs.
 
+![Screenshot (10)](https://user-images.githubusercontent.com/36515357/136688444-e1d21576-6b1d-4c45-9112-9579d64b7881.png)
 
-![IMG_5553](https://user-images.githubusercontent.com/36515357/135727555-0e869ca3-df0a-4d3f-875c-9ebced68dbd9.PNG)
+![Screenshot (11)](https://user-images.githubusercontent.com/36515357/136688375-bd300e3e-fede-417e-88f1-5d7a9542b5ba.png)
 
-![IMG_5554](https://user-images.githubusercontent.com/36515357/135727557-cdca42bd-3019-4df5-99fe-a706804484cc.PNG)
-
-![IMG_5555](https://user-images.githubusercontent.com/36515357/135727559-3afb487e-d678-4d98-8feb-517ea4c4fa14.PNG)
-
-![IMG_5556](https://user-images.githubusercontent.com/36515357/135727564-b7dfa87b-af11-4517-acb0-6bd9e949fa7a.PNG)
+![Screenshot (12)](https://user-images.githubusercontent.com/36515357/136688725-7f2dd9ef-3d3f-46f6-b30c-1bc67dc7ea34.png)

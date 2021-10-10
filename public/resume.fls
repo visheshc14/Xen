@@ -1,6 +1,6 @@
-PWD c:\Users\visha\Downloads\Xen\public
+PWD c:\Users\visha\OneDrive\Documents\Divertissement\Xen\public
 INPUT C:\Users\visha\AppData\Local\MiKTeX\miktex\data\le\pdftex\pdflatex.fmt
-INPUT c:\Users\visha\Downloads\Xen\public\resume.tex
+INPUT c:\Users\visha\OneDrive\Documents\Divertissement\Xen\public\resume.tex
 OUTPUT resume.log
 INPUT .\myresume.cls
 INPUT .\myresume.cls
