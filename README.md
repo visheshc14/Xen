@@ -1,6 +1,6 @@
 # Xen
 
-Personal/Portfolio Website of Vishesh Choudhary Made Using Rust, Rocket, Docker, Javascript (Technically No-Javascript), HTML, Tailwind CSS, TeX & MakeFile. CMS for Serving My Website and Personal Blogs.
+Personal/Portfolio Website of Vishesh Choudhary Made Using Rust, Rocket, Docker, Javascript, HTML, Tailwind CSS, TeX & MakeFile. CMS for Serving My Website and Personal Blogs.
 
 ![Screenshot (10)](https://user-images.githubusercontent.com/36515357/136688444-e1d21576-6b1d-4c45-9112-9579d64b7881.png)
 
