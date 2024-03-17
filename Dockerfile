@@ -18,12 +18,8 @@ COPY . .
 
 RUN yarn build
 
-RUN cargo install --target x86_64-unknown-linux-musl --path .
-
-FROM scratch
-
-COPY --from=builder /usr/local/cargo/bin/Xen .
+RUN cargo build --release 
 
 USER 1000
 
-CMD ["./Xen"]
+CMD ["./target/release/Xen"]
