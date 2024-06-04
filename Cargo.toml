@@ -23,3 +23,5 @@ comrak = { git = "https://github.com/visheshc14/comrak", branch = "master" }
 syntect = { version = "4.5.0", default-features = false, features = ["default-fancy"] }
 rustc_version_runtime = "0.2.0"
 lazy_static = "1.4.0"
+pest = "2.7.10"
+memchr = "=2.4.0" 
