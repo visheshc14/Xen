@@ -28,6 +28,4 @@ RUN cargo build --release
 # Change to non-root user
 USER 1000
 
-COPY ./target/release/Xen .
-
-CMD ["./Xen"]
+CMD ["./target/release/Xen"]
