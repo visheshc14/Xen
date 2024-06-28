@@ -11,7 +11,7 @@ RUN apt -y install nodejs npm
 RUN npm i -g yarn
 
 # Copy necessary files
-COPY Cargo.toml Cargo.lock package.json yarn.lock ./
+COPY Cargo.toml Rocket.toml RustConfig package.json ./
 
 # Install Yarn dependencies
 RUN yarn install
@@ -28,4 +28,4 @@ RUN cargo build --release
 # Change to non-root user
 USER 1000
 
-CMD ["./target/release/Xen"]
+CMD ["cd ./target/release", "./Xen"]
