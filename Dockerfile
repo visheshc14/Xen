@@ -1,39 +1,31 @@
-# Use official Rust image as base
-FROM rust:1.65 as builder
+FROM rustlang/rust:nightly AS builder
 
-# Set working directory
 WORKDIR /app
 
-# Install necessary dependencies
-RUN rustup target add x86_64-unknown-linux-musl
+# Add Rust target
+RUN rustup target add x86_64-unknown-linux-musl --toolchain=nightly
 
-# Install latest Node.js LTS (v20) and Yarn
-RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
-    && apt-get update \
-    && apt-get install -y --no-install-recommends nodejs npm \
-    && npm install -g yarn \
-    && apt-get clean && rm -rf /var/lib/apt/lists/*
+# Install Node.js and Yarn
+RUN curl -sL https://deb.nodesource.com/setup_14.x | bash -
+RUN apt -y install nodejs npm
+RUN npm i -g yarn
 
-# Copy project files
+# Copy necessary files
+COPY Cargo.toml Rocket.toml RustConfig package.json ./
+
+# Install Yarn dependencies
+RUN yarn install
+
+# Copy the remaining files
 COPY . .
 
-# Build the Rust application
-RUN cargo build --release
+# Build Yarn project
+RUN yarn build
 
-# Create a minimal final image
-FROM alpine:latest  
+# Build Rust project
+RUN cargo build --release 
 
-# Install required runtime dependencies
-RUN apk add --no-cache ca-certificates
+# Change to non-root user
+USER 1000
 
-# Set working directory
-WORKDIR /app
-
-# Copy the compiled binary from builder stage
-COPY --from=builder /app/target/release/xen /usr/local/bin/xen
-
-# Expose application port
-EXPOSE 8000
-
-# Set the entry point for the container
-CMD ["xen"]
+CMD ["./target/release/Xen"]
