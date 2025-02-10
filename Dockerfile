@@ -1,60 +1,61 @@
-# Use Rust with nightly support
+# Stage 1: Build
 FROM rust:latest AS builder
 
 # Set working directory
 WORKDIR /app
 
-# Install required dependencies
+# Install necessary tools
 RUN apt-get update && apt-get install -y \
     curl \
+    build-essential \
     musl-tools \
     pkg-config \
     libssl-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# Install Rust nightly toolchain & target
-RUN rustup install nightly && rustup default nightly
+# Set Rust to stable and add the musl target
+RUN rustup install stable && rustup default stable
 RUN rustup target add x86_64-unknown-linux-musl
 
 # Install Node.js and Yarn
-RUN curl -fsSL https://deb.nodesource.com/setup_14.x | bash - && \
-    apt-get install -y nodejs npm && \
-    npm i -g yarn
+RUN curl -fsSL https://deb.nodesource.com/setup_14.x | bash - \
+    && apt-get install -y nodejs npm \
+    && npm install -g yarn
 
-# Copy only dependency files first (improves caching)
-COPY Cargo.toml Cargo.lock Rocket.toml RustConfig package.json yarn.lock ./
+# Copy Rust and Node.js dependencies
+COPY Cargo.toml Cargo.lock Rocket.toml RustConfig package.json ./
+
+# Fetch Rust dependencies
+RUN cargo fetch
 
 # Install Yarn dependencies
 RUN yarn install --frozen-lockfile
 
-# Copy the rest of the project
+# Copy remaining source code
 COPY . .
 
-# Build frontend assets
+# Build frontend
 RUN yarn build
 
-# Build Rust project
+# Build Rust binary with musl
 RUN cargo build --release --target=x86_64-unknown-linux-musl
 
-# Use minimal runtime image
-FROM debian:bullseye-slim AS runtime
-
-# Install required runtime dependencies
-RUN apt-get update && apt-get install -y \
-    ca-certificates \
-    libssl-dev \
-    && rm -rf /var/lib/apt/lists/*
+# Stage 2: Create Minimal Runtime Image
+FROM alpine:latest
 
 WORKDIR /app
 
-# Copy compiled binary from builder
-COPY --from=builder /app/target/x86_64-unknown-linux-musl/release/Xen /usr/local/bin/Xen
+# Install required runtime dependencies
+RUN apk add --no-cache ca-certificates
 
-# Use non-root user
+# Copy the compiled Rust binary from the builder
+COPY --from=builder /app/target/x86_64-unknown-linux-musl/release/Xen ./Xen
+
+# Set executable permissions
+RUN chmod +x ./Xen
+
+# Switch to non-root user for security
 USER 1000
 
-# Expose Rocket default port
-EXPOSE 8000
-
-# Start application
-CMD ["/usr/local/bin/Xen"]
+# Run the application
+CMD ["./Xen"]
