@@ -10,10 +10,8 @@ license = "MIT"
 keywords = ["cms", "website", "blog", "web"]
 readme = "README.md"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
 [dependencies]
-[dependencies]
+# Use Rocket 0.5 (latest release candidate)
 rocket = "0.5.0-rc.3"
 askama = { version = "0.10.5", features = ["with-rocket"] }
 askama_rocket = "0.10.0"
@@ -26,8 +24,3 @@ lazy_static = "1.4.0"
 pest = "2.7.10"
 memchr = "2.4.0"
 time = "0.3.36"
-
-# 🚀 Ensure Cargo can find the main entry point
-[[bin]]
-name = "Xen"
-path = "src/main.rs"
