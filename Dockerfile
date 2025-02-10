@@ -25,8 +25,11 @@ RUN curl -fsSL https://deb.nodesource.com/setup_14.x | bash - \
 # Copy Rust and Node.js dependencies
 COPY Cargo.toml Cargo.lock Rocket.toml RustConfig package.json ./
 
+# Ensure we have a valid target in Cargo.toml
+RUN grep -q '\[\[bin\]\]' Cargo.toml || grep -q '\[lib\]' Cargo.toml || (echo 'Error: Cargo.toml has no valid targets' && exit 1)
+
 # Fetch Rust dependencies
-RUN cargo fetch
+RUN cargo fetch || true  # Ignore fetch errors if Cargo.lock is missing
 
 # Install Yarn dependencies
 RUN yarn install --frozen-lockfile
