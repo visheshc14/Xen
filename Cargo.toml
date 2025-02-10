@@ -26,3 +26,8 @@ lazy_static = "1.4.0"
 pest = "2.7.10"
 memchr = "=2.4.0" 
 time = "0.3.36"
+
+# 🚀 Ensure Cargo can find the main entry point
+[[bin]]
+name = "Xen"
+path = "src/main.rs"
