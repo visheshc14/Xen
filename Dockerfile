@@ -1,31 +1,64 @@
-FROM rust:1.65 as builder
+# Use Rust nightly as base image
+FROM rustlang/rust:nightly AS builder
 
+# Set working directory
 WORKDIR /app
 
-# Add Rust target
-RUN rustup target add x86_64-unknown-linux-musl --toolchain=nightly
+# Install required Rust toolchain components
+RUN rustup install nightly \
+    && rustup default nightly \
+    && rustup target add x86_64-unknown-linux-musl
 
-# Install Node.js and Yarn
-RUN curl -sL https://deb.nodesource.com/setup_20.x | bash -
-RUN apt -y install nodejs npm
-RUN npm i -g yarn
+# Install required dependencies
+RUN apt update && apt install -y --no-install-recommends \
+    musl-tools curl ca-certificates \
+    && curl -fsSL https://deb.nodesource.com/setup_14.x | bash - \
+    && apt install -y nodejs npm \
+    && npm i -g yarn \
+    && rm -rf /var/lib/apt/lists/*
 
-# Copy necessary files
-COPY Cargo.toml Rocket.toml RustConfig package.json ./
+# Copy dependencies separately for caching
+COPY Cargo.toml Cargo.lock Rocket.toml RustConfig package.json yarn.lock ./
 
-# Install Yarn dependencies
-RUN yarn install
+# Install Rust dependencies
+RUN cargo fetch
 
-# Copy the remaining files
+# Install Node.js dependencies
+RUN yarn install --frozen-lockfile
+
+# Copy source code
 COPY . .
 
-# Build Yarn project
+# Build Node.js project
 RUN yarn build
 
 # Build Rust project
-RUN cargo build --release 
+RUN cargo build --release --target=x86_64-unknown-linux-musl
 
-# Change to non-root user
-USER 1000
+# Create a minimal runtime image
+FROM alpine:latest
 
-CMD ["./target/release/Xen"]
+# Install runtime dependencies
+RUN apk add --no-cache ca-certificates
+
+# Set working directory
+WORKDIR /app
+
+# Copy compiled Rust binary from builder
+COPY --from=builder /app/target/x86_64-unknown-linux-musl/release/Xen .
+
+# Copy built frontend assets if needed
+COPY --from=builder /app/public ./public
+
+# Create a non-root user and set permissions
+RUN addgroup --system appgroup && adduser --system --group appuser \
+    && chown -R appuser:appgroup /app
+
+# Use non-root user
+USER appuser
+
+# Expose application port
+EXPOSE 8000
+
+# Start application
+CMD ["./Xen"]
