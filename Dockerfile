@@ -1,20 +1,25 @@
-FROM rustlang/rust:nightly AS builder
+# Use a stable Rust version instead of nightly
+FROM rust:1.65 AS builder
 
 WORKDIR /app
 
 # Add Rust target
-RUN rustup target add x86_64-unknown-linux-musl --toolchain=nightly
+RUN rustup target add x86_64-unknown-linux-musl
 
 # Install Node.js and Yarn
-RUN curl -sL https://deb.nodesource.com/setup_14.x | bash -
-RUN apt -y install nodejs npm
-RUN npm i -g yarn
+RUN curl -fsSL https://deb.nodesource.com/setup_14.x | bash - \
+    && apt-get update \
+    && apt-get install -y nodejs npm \
+    && npm install -g yarn
 
 # Copy necessary files
-COPY Cargo.toml Rocket.toml RustConfig package.json ./
+COPY Cargo.toml Cargo.lock Rocket.toml package.json ./
+
+# Update dependencies to ensure compatibility
+RUN cargo update
 
 # Install Yarn dependencies
-RUN yarn install
+RUN yarn install --frozen-lockfile
 
 # Copy the remaining files
 COPY . .
@@ -22,10 +27,21 @@ COPY . .
 # Build Yarn project
 RUN yarn build
 
-# Build Rust project
-RUN cargo build --release 
+# Build Rust project in release mode with MUSL target for a static binary
+RUN cargo build --release --target=x86_64-unknown-linux-musl
 
-# Change to non-root user
+# Use a minimal runtime image
+FROM alpine:latest
+WORKDIR /app
+
+# Install runtime dependencies
+RUN apk add --no-cache ca-certificates
+
+# Copy the Rust binary from the builder stage
+COPY --from=builder /app/target/x86_64-unknown-linux-musl/release/Xen .
+
+# Change to non-root user for security
 USER 1000
 
-CMD ["./target/release/Xen"]
+# Run the application
+CMD ["./Xen"]
