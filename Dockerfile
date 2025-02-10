@@ -1,4 +1,4 @@
-FROM rustlang/rust:nightly AS builder
+FROM rust:1.65 as builder
 
 WORKDIR /app
 
@@ -6,7 +6,7 @@ WORKDIR /app
 RUN rustup target add x86_64-unknown-linux-musl --toolchain=nightly
 
 # Install Node.js and Yarn
-RUN curl -sL https://deb.nodesource.com/setup_14.x | bash -
+RUN curl -sL https://deb.nodesource.com/setup_20.x | bash -
 RUN apt -y install nodejs npm
 RUN npm i -g yarn
 
