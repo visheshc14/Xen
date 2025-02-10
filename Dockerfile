@@ -1,64 +1,54 @@
-# Stage 1: Build
-FROM rust:latest AS builder
+# Use Rust nightly instead of stable
+FROM rustlang/rust:nightly AS builder
 
-# Set working directory
 WORKDIR /app
 
-# Install necessary tools
-RUN apt-get update && apt-get install -y \
-    curl \
-    build-essential \
-    musl-tools \
-    pkg-config \
-    libssl-dev \
-    && rm -rf /var/lib/apt/lists/*
+# Install required dependencies
+RUN apt update && apt install -y curl gcc g++ musl-tools pkg-config libssl-dev
 
-# Set Rust to stable and add the musl target
-RUN rustup install stable && rustup default stable
-RUN rustup target add x86_64-unknown-linux-musl
+# Set default toolchain to nightly
+RUN rustup default nightly
+RUN rustup target add x86_64-unknown-linux-musl --toolchain=nightly
 
 # Install Node.js and Yarn
-RUN curl -fsSL https://deb.nodesource.com/setup_14.x | bash - \
-    && apt-get install -y nodejs npm \
-    && npm install -g yarn
+RUN curl -fsSL https://deb.nodesource.com/setup_14.x | bash -
+RUN apt install -y nodejs npm
+RUN npm install -g yarn
 
-# Copy Rust and Node.js dependencies
-COPY Cargo.toml Cargo.lock Rocket.toml RustConfig package.json ./
-
-# Ensure we have a valid target in Cargo.toml
-RUN grep -q '\[\[bin\]\]' Cargo.toml || grep -q '\[lib\]' Cargo.toml || (echo 'Error: Cargo.toml has no valid targets' && exit 1)
+# Copy necessary files
+COPY Cargo.toml Rocket.toml package.json ./
 
 # Fetch Rust dependencies
-RUN cargo fetch || true  # Ignore fetch errors if Cargo.lock is missing
+RUN cargo fetch
 
 # Install Yarn dependencies
-RUN yarn install --frozen-lockfile
+RUN yarn install
 
-# Copy remaining source code
+# Copy all project files
 COPY . .
 
 # Build frontend
 RUN yarn build
 
-# Build Rust binary with musl
+# Compile Rust project
 RUN cargo build --release --target=x86_64-unknown-linux-musl
 
-# Stage 2: Create Minimal Runtime Image
-FROM alpine:latest
+# Use minimal runtime image
+FROM debian:bullseye-slim AS runtime
 
 WORKDIR /app
 
-# Install required runtime dependencies
-RUN apk add --no-cache ca-certificates
+# Install runtime dependencies
+RUN apt update && apt install -y libssl-dev ca-certificates
 
-# Copy the compiled Rust binary from the builder
-COPY --from=builder /app/target/x86_64-unknown-linux-musl/release/Xen ./Xen
+# Copy built binary from builder
+COPY --from=builder /app/target/x86_64-unknown-linux-musl/release/Xen /app/Xen
 
-# Set executable permissions
-RUN chmod +x ./Xen
-
-# Switch to non-root user for security
+# Use non-root user
 USER 1000
 
-# Run the application
-CMD ["./Xen"]
+# Expose application port
+EXPOSE 8000
+
+# Run the compiled binary
+CMD ["/app/Xen"]
