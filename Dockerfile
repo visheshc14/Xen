@@ -1,14 +1,13 @@
-# Use Rust nightly for Rocket
-FROM rustlang/rust:nightly AS builder
+# Use Rust for Rocket
+FROM rust:bullseye AS builder
 
 WORKDIR /app
 
 # Install dependencies
 RUN apt update && apt install -y curl gcc g++ musl-tools pkg-config libssl-dev
 
-# Set Rust toolchain to nightly
-RUN rustup default nightly
-RUN rustup target add x86_64-unknown-linux-musl --toolchain=nightly
+# Set Rust toolchain
+RUN rustup target add x86_64-unknown-linux-musl
 
 # Install Node.js & Yarn
 RUN curl -fsSL https://deb.nodesource.com/setup_14.x | bash -
