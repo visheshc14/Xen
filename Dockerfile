@@ -1,5 +1,5 @@
-# Use Rust for Rocket (builder stage)
-FROM rust:bullseye AS builder
+# Use nightly Rust for Rocket (builder stage)
+FROM rustlang/rust:nightly-bullseye AS builder
 
 WORKDIR /app
 
