@@ -12,6 +12,7 @@ pub mod utils;
 use std::{ffi::OsStr, io::Cursor, path::PathBuf};
 
 use askama::Template;
+use askama_rocket::Responder;
 use chrono::{Datelike, Local};
 use comrak::{
     format_html, nodes::NodeValue, parse_document, Arena, ComrakExtensionOptions, ComrakOptions,
@@ -19,7 +20,7 @@ use comrak::{
 use lazy_static::lazy_static;
 use rocket::{
     http::{ContentType, Status},
-    response,
+    response::{self, content::RawHtml},
 };
 use rustc_version_runtime::version;
 
@@ -78,17 +79,18 @@ struct PostTemplate {
 }
 
 #[get("/")]
-fn index() -> IndexTemplate {
-    IndexTemplate {
-        year: Local::now().date().year().to_string(),
+fn index() -> RawHtml<String> {
+    let template = IndexTemplate {
+        year: Local::now().date_naive().year().to_string(),
         path: EXE.to_string(),
         version: VERSION.to_string(),
         title: "Vishesh Choudhary".to_owned(),
-    }
+    };
+    RawHtml(template.render().unwrap())
 }
 
 #[get("/blog")]
-fn blog() -> BlogTemplate {
+fn blog() -> RawHtml<String> {
     let post_list: Vec<_> = Posts::iter()
         .map(|f| {
             let slug = f.as_ref();
@@ -101,23 +103,24 @@ fn blog() -> BlogTemplate {
         })
         .collect();
 
-    BlogTemplate {
-        year: Local::now().date().year().to_string(),
+    let template = BlogTemplate {
+        year: Local::now().date_naive().year().to_string(),
         posts: post_list,
         path: EXE.to_string(),
         version: VERSION.to_string(),
         title: "Blog - Vishesh Choudhary".to_owned(),
-    }
+    };
+    RawHtml(template.render().unwrap())
 }
 
 #[get("/blog/<file>")]
-fn get_blog<'r>(file: String) -> response::Result<'r> {
+fn get_blog(file: String) -> Result<RawHtml<String>, Status> {
     let filename = format!("{}.md", file);
     Posts::get(&filename).map_or_else(
         || Err(Status::NotFound),
         |d| {
             let post_text = String::from_utf8(d.as_ref().to_vec()).unwrap();
-            let mut opts = &mut ComrakOptions::default();
+            let mut opts = ComrakOptions::default();
             opts.extension = ComrakExtensionOptions {
                 strikethrough: true,
                 tagfilter: false,
@@ -133,7 +136,7 @@ fn get_blog<'r>(file: String) -> response::Result<'r> {
             opts.render.unsafe_ = true; // needed to embed gists
 
             let arena = Arena::new();
-            let root = parse_document(&arena, &post_text, opts);
+            let root = parse_document(&arena, &post_text, &opts);
             iter_nodes(root, &|node| match &mut node.data.borrow_mut().value {
                 &mut NodeValue::CodeBlock(ref mut block) => {
                     let lang = String::from_utf8(block.info.clone()).unwrap();
@@ -144,29 +147,23 @@ fn get_blog<'r>(file: String) -> response::Result<'r> {
             });
 
             let mut html = vec![];
-            format_html(root, opts, &mut html).unwrap();
-            response::Response::build()
-                .header(ContentType::HTML)
-                .sized_body(Cursor::new(
-                    PostTemplate {
-                        year: Local::now().date().year().to_string(),
-                        post: String::from_utf8(html).unwrap(),
-                        path: EXE.to_string(),
-                        version: VERSION.to_string(),
-                        title: file.splitn(2, '_').collect::<Vec<_>>()[1]
-                            .to_owned()
-                            .replace('-', " "),
-                    }
-                    .render()
-                    .unwrap(),
-                ))
-                .ok()
+            format_html(root, &opts, &mut html).unwrap();
+            let template = PostTemplate {
+                year: Local::now().date_naive().year().to_string(),
+                post: String::from_utf8(html).unwrap(),
+                path: EXE.to_string(),
+                version: VERSION.to_string(),
+                title: file.splitn(2, '_').collect::<Vec<_>>()[1]
+                    .to_owned()
+                    .replace('-', " "),
+            };
+            Ok(RawHtml(template.render().unwrap()))
         },
     )
 }
 
 #[get("/static/<file..>")]
-fn public<'r>(file: PathBuf) -> response::Result<'r> {
+fn public(file: PathBuf) -> Result<(ContentType, Vec<u8>), Status> {
     let filename = file.display().to_string();
     Static::get(&filename).map_or_else(
         || Err(Status::NotFound),
@@ -175,29 +172,22 @@ fn public<'r>(file: PathBuf) -> response::Result<'r> {
                 .as_path()
                 .extension()
                 .and_then(OsStr::to_str)
-                .ok_or_else(|| Status::new(400, "Could not get file extension"))?;
+                .ok_or(Status::BadRequest)?;
             let content_type = ContentType::from_extension(ext)
-                .ok_or_else(|| Status::new(400, "Could not get file content type"))?;
-            response::Response::build()
-                .header(content_type)
-                .sized_body(Cursor::new(d))
-                .ok()
+                .ok_or(Status::BadRequest)?;
+            Ok((content_type, d.to_vec()))
         },
     )
 }
 
 #[get("/favicon.ico")]
-fn favicon<'r>() -> response::Result<'r> {
-    let icon = Static::get("favicon.ico").unwrap();
-    let content_type = ContentType::Icon;
-    response::Response::build()
-        .header(content_type)
-        .sized_body(Cursor::new(icon))
-        .ok()
+fn favicon() -> Result<(ContentType, Vec<u8>), Status> {
+    let icon = Static::get("favicon.ico").ok_or(Status::NotFound)?;
+    Ok((ContentType::Icon, icon.to_vec()))
 }
 
 fn main() {
-    rocket::ignite()
+    rocket::build()
         .mount("/", routes!(index, public, blog, get_blog, favicon))
         .launch();
 }
