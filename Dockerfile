@@ -22,7 +22,7 @@ RUN curl -fsSL https://deb.nodesource.com/setup_14.x | bash - \
     && npm install -g yarn
 
 # Copy dependency files
-COPY Cargo.toml Cargo.lock Rocket.toml package.json yarn.lock ./
+COPY Cargo.toml Rocket.toml package.json ./
 
 # Fetch Rust dependencies (cache layer)
 RUN cargo fetch
