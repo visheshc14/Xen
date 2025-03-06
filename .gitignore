@@ -28,6 +28,9 @@ Session.vim
 # Included because it is part of the test case
 !/src/test/run-make/thumb-none-qemu/example/.cargo
 
+## Lock
+*.lock
+
 ## Configuration
 /config.toml
 /Makefile
