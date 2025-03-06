@@ -9,10 +9,9 @@ extern crate rust_embed;
 
 pub mod utils;
 
-use std::{ffi::OsStr, io::Cursor, path::PathBuf};
+use std::{ffi::OsStr, path::PathBuf};
 
 use askama::Template;
-use askama_rocket::Responder;
 use chrono::{Datelike, Local};
 use comrak::{
     format_html, nodes::NodeValue, parse_document, Arena, ComrakExtensionOptions, ComrakOptions,
@@ -20,7 +19,7 @@ use comrak::{
 use lazy_static::lazy_static;
 use rocket::{
     http::{ContentType, Status},
-    response::{self, content::RawHtml},
+    response::{content::RawHtml},
 };
 use rustc_version_runtime::version;
 
@@ -186,8 +185,12 @@ fn favicon() -> Result<(ContentType, Vec<u8>), Status> {
     Ok((ContentType::Icon, icon.to_vec()))
 }
 
-fn main() {
-    rocket::build()
+#[rocket::main]
+async fn main() -> Result<(), rocket::Error> {
+    let _rocket = rocket::build()
         .mount("/", routes!(index, public, blog, get_blog, favicon))
-        .launch();
+        .ignite().await?
+        .launch().await?;
+
+    Ok(())
 }
