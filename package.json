@@ -10,8 +10,8 @@
     "@fullhuman/postcss-purgecss": "^4.0.3",
     "autoprefixer": "^10.3.4",
     "cssnano": "^5.0.2",
-    "postcss": "^8.3.6",
-    "postcss-cli": "^8.3.1",
+    "postcss": "^8.5.3",
+    "postcss-cli": "^11.0.0",
     "rimraf": "^3.0.2",
     "tailwindcss": "^2.2.15"
   },

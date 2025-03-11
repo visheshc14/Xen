@@ -1,64 +1,36 @@
-# Use nightly Rust for Rocket (builder stage)
-FROM rustlang/rust:nightly-bullseye AS builder
+# Use nightly Rust as the base image
+FROM rustlang/rust:nightly AS builder
 
+# Set the working directory
 WORKDIR /app
 
-# Install system dependencies
-RUN apt update && apt install -y \
-    curl \
-    gcc \
-    g++ \
-    musl-tools \
-    pkg-config \
-    libssl-dev \
-    && rm -rf /var/lib/apt/lists/*
+# Add the musl target for Rust
+RUN rustup target add x86_64-unknown-linux-musl --toolchain=nightly
 
-# Set Rust toolchain for musl target
-RUN rustup target add x86_64-unknown-linux-musl
+# Install Node.js and npm
+RUN curl -sL https://deb.nodesource.com/setup_14.x | bash - && \
+    apt -y install nodejs npm
 
-# Install Node.js & Yarn
-RUN curl -fsSL https://deb.nodesource.com/setup_14.x | bash - \
-    && apt install -y nodejs \
-    && npm install -g yarn
+# Install Yarn globally
+RUN npm i -g yarn
 
 # Copy dependency files
-COPY Cargo.toml Rocket.toml package.json ./
+COPY Cargo.toml Cargo.lock package.json yarn.lock ./
 
-# Fetch Rust dependencies (cache layer)
-RUN cargo fetch
+# Install Yarn dependencies
+RUN yarn install
 
-# Install Yarn dependencies (cache layer)
-RUN yarn install --frozen-lockfile
-
-# Copy all project files
+# Copy the rest of the application code
 COPY . .
 
-# Build frontend
+# Build the frontend
 RUN yarn build
 
-# Compile Rust project
-RUN cargo build --release --target=x86_64-unknown-linux-musl
+# Build the Rust project in release mode
+RUN cargo build --release 
 
-# Use minimal runtime image
-FROM debian:bullseye-slim AS runtime
-
-WORKDIR /app
-
-# Install runtime dependencies
-RUN apt update && apt install -y \
-    libssl-dev \
-    ca-certificates \
-    && rm -rf /var/lib/apt/lists/*
-
-# Copy built binary from builder
-COPY --from=builder /app/target/x86_64-unknown-linux-musl/release/Xen /app/Xen
-
-# Use non-root user
-RUN useradd -m appuser
-USER appuser
-
-# Expose application port
-EXPOSE 8000
+# Use a non-root user
+USER 1000
 
 # Run the compiled binary
-CMD ["/app/Xen"]
+CMD ["./target/release/Xen"]
