@@ -19,18 +19,13 @@ use comrak::{
 use lazy_static::lazy_static;
 use rocket::{
     http::{ContentType, Status},
-    response::{content::RawHtml},
+    response::content::RawHtml,
 };
 use rustc_version_runtime::version;
 
 use crate::utils::{highlight_text, iter_nodes};
 
 lazy_static! {
-    static ref EXE: String = std::env::current_exe()
-        .unwrap()
-        .as_path()
-        .to_string_lossy()
-        .to_string();
     static ref VERSION: String = version().to_string();
 }
 
@@ -47,7 +42,6 @@ struct Posts;
 struct IndexTemplate {
     title: String,
     year: String,
-    path: String,
     version: String,
 }
 
@@ -63,7 +57,6 @@ struct BlogTemplate {
     title: String,
     year: String,
     posts: Vec<Post>,
-    path: String,
     version: String,
 }
 
@@ -73,7 +66,6 @@ struct PostTemplate {
     title: String,
     year: String,
     post: String,
-    path: String,
     version: String,
 }
 
@@ -81,7 +73,6 @@ struct PostTemplate {
 fn index() -> RawHtml<String> {
     let template = IndexTemplate {
         year: Local::now().date_naive().year().to_string(),
-        path: EXE.to_string(),
         version: VERSION.to_string(),
         title: "Vishesh Choudhary".to_owned(),
     };
@@ -105,7 +96,6 @@ fn blog() -> RawHtml<String> {
     let template = BlogTemplate {
         year: Local::now().date_naive().year().to_string(),
         posts: post_list,
-        path: EXE.to_string(),
         version: VERSION.to_string(),
         title: "Blog - Vishesh Choudhary".to_owned(),
     };
@@ -132,12 +122,12 @@ fn get_blog(file: String) -> Result<RawHtml<String>, Status> {
                 description_lists: false,
                 front_matter_delimiter: None,
             };
-            opts.render.unsafe_ = true; // needed to embed gists
+            opts.render.unsafe_ = true;
 
             let arena = Arena::new();
             let root = parse_document(&arena, &post_text, &opts);
             iter_nodes(root, &|node| match &mut node.data.borrow_mut().value {
-                &mut NodeValue::CodeBlock(ref mut block) => {
+                NodeValue::CodeBlock(ref mut block) => {
                     let lang = String::from_utf8(block.info.clone()).unwrap();
                     let code = String::from_utf8(block.literal.clone()).unwrap();
                     block.literal = highlight_text(code, lang).as_bytes().to_vec();
@@ -150,7 +140,6 @@ fn get_blog(file: String) -> Result<RawHtml<String>, Status> {
             let template = PostTemplate {
                 year: Local::now().date_naive().year().to_string(),
                 post: String::from_utf8(html).unwrap(),
-                path: EXE.to_string(),
                 version: VERSION.to_string(),
                 title: file.splitn(2, '_').collect::<Vec<_>>()[1]
                     .to_owned()
@@ -172,8 +161,7 @@ fn public(file: PathBuf) -> Result<(ContentType, Vec<u8>), Status> {
                 .extension()
                 .and_then(OsStr::to_str)
                 .ok_or(Status::BadRequest)?;
-            let content_type = ContentType::from_extension(ext)
-                .ok_or(Status::BadRequest)?;
+            let content_type = ContentType::from_extension(ext).ok_or(Status::BadRequest)?;
             Ok((content_type, d.to_vec()))
         },
     )
@@ -187,7 +175,17 @@ fn favicon() -> Result<(ContentType, Vec<u8>), Status> {
 
 #[rocket::main]
 async fn main() -> Result<(), rocket::Error> {
-    let _rocket = rocket::build()
+    let port: u16 = std::env::var("PORT")
+        .ok()
+        .and_then(|p| p.parse().ok())
+        .unwrap_or(8000);
+
+    let config = rocket::Config {
+        port,
+        ..rocket::Config::default()
+    };
+
+    let _rocket = rocket::custom(config)
         .mount("/", routes!(index, public, blog, get_blog, favicon))
         .ignite().await?
         .launch().await?;
