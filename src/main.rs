@@ -175,7 +175,17 @@ fn favicon() -> Result<(ContentType, Vec<u8>), Status> {
 
 #[rocket::main]
 async fn main() -> Result<(), rocket::Error> {
-    let _rocket = rocket::build()
+    let port: u16 = std::env::var("PORT")
+        .ok()
+        .and_then(|p| p.parse().ok())
+        .unwrap_or(8000);
+
+    let config = rocket::Config {
+        port,
+        ..rocket::Config::default()
+    };
+
+    let _rocket = rocket::custom(config)
         .mount("/", routes!(index, public, blog, get_blog, favicon))
         .ignite().await?
         .launch().await?;
