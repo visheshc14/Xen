@@ -26,6 +26,9 @@ COPY . .
 # Build the frontend
 RUN yarn build
 
+# Document that the container listens on port 8000
+EXPOSE 8000
+
 # Build the Rust project in release mode
 RUN cargo build --release 
 
