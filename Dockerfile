@@ -33,4 +33,4 @@ RUN cargo build --release
 USER 1000
 
 # Run the compiled binary
-CMD ["./target/release/Xen"]
+CMD ["./target/release/xen"]
