@@ -182,6 +182,7 @@ async fn main() -> Result<(), rocket::Error> {
 
     let config = rocket::Config {
         port,
+        address: std::net::Ipv4Addr::new(0, 0, 0, 0).into(),
         ..rocket::Config::default()
     };
 
