@@ -7,14 +7,14 @@ WORKDIR /app
 # Add the musl target for Rust
 RUN rustup target add x86_64-unknown-linux-musl --toolchain=nightly
 
-# Install Node.js and npm
-RUN curl -sL https://deb.nodesource.com/setup_18.x | bash - && \
-    apt -y install nodejs npm
+# Install Node.js 18 (includes npm by default) and Yarn
+RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash - \
+    && apt-get install -y nodejs \
+    && npm install -g yarn \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 
-# Install Yarn globally
-RUN npm i -g yarn
-
-# Copy dependency files
+# Copy dependency files first (for caching)
 COPY Cargo.toml Cargo.lock package.json yarn.lock ./
 
 # Install Yarn dependencies
@@ -30,7 +30,7 @@ RUN yarn build
 EXPOSE 8000
 
 # Build the Rust project in release mode
-RUN cargo build --release 
+RUN cargo build --release
 
 # Use a non-root user
 USER 1000
