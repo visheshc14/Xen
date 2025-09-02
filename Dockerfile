@@ -8,7 +8,7 @@ WORKDIR /app
 RUN rustup target add x86_64-unknown-linux-musl --toolchain=nightly
 
 # Install Node.js and npm
-RUN curl -sL https://deb.nodesource.com/setup_14.x | bash - && \
+RUN curl -sL https://deb.nodesource.com/setup_18.x | bash - && \
     apt -y install nodejs npm
 
 # Install Yarn globally
