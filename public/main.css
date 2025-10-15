@@ -117,3 +117,9 @@ li:after {
 *:hover::-webkit-scrollbar-thumb {
   visibility: visible;
 }
+
+h1::before,
+h2::before,
+h3::before {
+  content: none !important;
+}
