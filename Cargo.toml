@@ -12,15 +12,17 @@ readme = "README.md"
 
 [dependencies]
 # Use Rocket 0.5 (latest release candidate)
-rocket = "0.5.1"
-askama = { version = "0.12.1", features = ["with-rocket"] }
-askama_rocket = "0.12.0"  # Updated to support rocket v0.5.1
-rust-embed = { version = "5.9.0", features = ["debug-embed"] }
-chrono = "0.4.19"
+rocket = { version = "0.5.1", features = ["json"] }
+askama = "0.12"
+askama_rocket = "0.12"
+html-escape = "0.2"
+rust-embed = { version = "6.4.0", features = ["debug-embed"] }
+chrono = "0.4"
 comrak = { git = "https://github.com/visheshc14/comrak", branch = "master" }
-syntect = { version = "4.5.0", default-features = false, features = ["default-fancy"] }
-rustc_version_runtime = "0.2.0"
+syntect = { version = "5.0.0", default-features = false, features = ["default-fancy"] }
+rustc_version_runtime = "0.2.1"
 lazy_static = "1.4.0"
+markdown-meta-parser = "0.1.1"
 pest = "2.7.10"
 memchr = "2.4.0"
 time = "0.3.36"

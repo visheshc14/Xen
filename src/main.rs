@@ -1,54 +1,60 @@
-#![feature(proc_macro_hygiene, decl_macro)]
-#![allow(non_snake_case)]
-
-#[macro_use]
-extern crate rocket;
-
-#[macro_use]
-extern crate rust_embed;
-
-pub mod utils;
-
-use std::{ffi::OsStr, path::PathBuf};
+use std::collections::HashMap;
+use std::fs;
+use std::path::{Path, PathBuf};
 
 use askama::Template;
-use chrono::{Datelike, Local};
+use chrono::{Datelike, Local, NaiveDate};
 use comrak::{
     format_html, nodes::NodeValue, parse_document, Arena, ComrakExtensionOptions, ComrakOptions,
 };
 use lazy_static::lazy_static;
+use markdown_meta_parser::MetaData;
 use rocket::{
-    http::{ContentType, Status},
-    response::content::RawHtml,
+    get,
+    fs::FileServer,
+    http::ContentType,
+    http::Status,
+    Build, Rocket,
 };
 use rustc_version_runtime::version;
 
+pub mod utils;
 use crate::utils::{highlight_text, iter_nodes};
 
+
 lazy_static! {
+    static ref EXE: String = std::env::current_exe()
+        .unwrap()
+        .as_path()
+        .to_string_lossy()
+        .to_string();
     static ref VERSION: String = version().to_string();
+    // Read posts directly from the repo's posts/ folder (no rebuild needed).
+    static ref POSTS_DIR: PathBuf = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("posts");
 }
 
-#[derive(RustEmbed)]
+
+#[derive(rust_embed::RustEmbed)]
 #[folder = "public/"]
 struct Static;
 
-#[derive(RustEmbed)]
-#[folder = "posts/"]
-struct Posts;
 
 #[derive(Template)]
 #[template(path = "index/index.html")]
 struct IndexTemplate {
     title: String,
     year: String,
+    path: String,
     version: String,
 }
 
+#[derive(Clone)]
 struct Post {
     date: String,
     title: String,
     slug: String,
+    blurb: String,
+    tags: Vec<String>,
 }
 
 #[derive(Template)]
@@ -57,6 +63,7 @@ struct BlogTemplate {
     title: String,
     year: String,
     posts: Vec<Post>,
+    path: String,
     version: String,
 }
 
@@ -66,130 +73,249 @@ struct PostTemplate {
     title: String,
     year: String,
     post: String,
+    path: String,
     version: String,
 }
 
+
+
+fn comrak_opts() -> ComrakOptions {
+    let mut opts = ComrakOptions::default();
+    opts.extension = ComrakExtensionOptions {
+        strikethrough: true,
+        tagfilter: false,
+        table: true,
+        autolink: true,
+        tasklist: true,
+        superscript: false,
+        header_ids: Some("#".to_string()),
+        footnotes: false,
+        description_lists: false,
+        front_matter_delimiter: None,
+    };
+  
+    opts.render.unsafe_ = true;
+    opts
+}
+
+fn read_to_string(p: &Path) -> Result<String, Status> {
+    fs::read_to_string(p).map_err(|_| Status::InternalServerError)
+}
+
+fn list_markdown_files(dir: &Path) -> Vec<PathBuf> {
+    let mut files = Vec::new();
+    if let Ok(rd) = fs::read_dir(dir) {
+        for entry in rd.flatten() {
+            let path = entry.path();
+            if path.extension().and_then(|s| s.to_str()) == Some("md") {
+                files.push(path);
+            }
+        }
+    }
+    files
+}
+
+fn slug_from_path(path: &Path) -> String {
+    path.file_stem()
+        .and_then(|s| s.to_str())
+        .unwrap_or_default()
+        .to_string()
+}
+
+
+fn normalize_lang(lang: &str) -> String {
+    match lang.trim().to_ascii_lowercase().as_str() {
+        "" => "".to_string(),
+        "rust" | "rs" => "rs".to_string(),
+        "js" | "javascript" => "javascript".to_string(),
+        "ts" | "typescript" => "typescript".to_string(),
+        "py" | "python" => "python".to_string(),
+        "sh" | "bash" | "zsh" => "bash".to_string(),
+        "c++" | "cpp" => "cpp".to_string(),
+        "c" => "c".to_string(),
+        "html" => "html".to_string(),
+        "css" => "css".to_string(),
+        other => other.to_string(),
+    }
+}
+
+
+
 #[get("/")]
-fn index() -> RawHtml<String> {
-    let template = IndexTemplate {
+fn index() -> IndexTemplate {
+    IndexTemplate {
         year: Local::now().date_naive().year().to_string(),
+        path: EXE.to_string(),
         version: VERSION.to_string(),
         title: "Vishesh Choudhary".to_owned(),
-    };
-    RawHtml(template.render().unwrap())
+    }
 }
 
 #[get("/blog")]
-fn blog() -> RawHtml<String> {
-    let post_list: Vec<_> = Posts::iter()
-        .map(|f| {
-            let slug = f.as_ref();
-            let split: Vec<_> = slug.splitn(2, '_').collect();
-            Post {
-                date: split[0].to_owned(),
-                title: split[1].replace("-", " ").replace(".md", ""),
-                slug: slug.to_owned().replace(".md", ""),
-            }
-        })
-        .collect();
+fn blog() -> BlogTemplate {
+    let opts = comrak_opts();
 
-    let template = BlogTemplate {
+    let mut posts: Vec<Post> = Vec::new();
+
+    for file in list_markdown_files(&POSTS_DIR) {
+        let Ok(content) = read_to_string(&file) else { continue };
+
+        
+        let mut type_mark = HashMap::new();
+        type_mark.insert("tags".into(), "array");
+
+        let meta = MetaData {
+            content,
+            required: vec![
+                "title".to_owned(),
+                "tags".to_owned(),
+                "date".to_owned(),
+                "blurb".to_owned(),
+            ],
+            type_mark,
+        };
+
+        let Ok((parsed_meta, body_or_blurb_md)) = meta.parse() else { continue };
+
+        let title = match parsed_meta["title"].clone() {
+            markdown_meta_parser::Value::String(t) => t.replace('\'', ""),
+            _ => "".to_owned(),
+        };
+
+        let date = match parsed_meta["date"].clone() {
+            markdown_meta_parser::Value::String(d) => d,
+            _ => "".to_owned(),
+        };
+
+        let blurb_front = match parsed_meta["blurb"].clone() {
+            markdown_meta_parser::Value::String(b) => b.replace('"', ""),
+            _ => "".to_owned(),
+        };
+
+        let tags = match parsed_meta["tags"].clone() {
+            markdown_meta_parser::Value::Array(t) => t,
+            _ => vec![],
+        };
+
+        
+        let blurb_src = if blurb_front.trim().is_empty() {
+            body_or_blurb_md
+        } else {
+            blurb_front
+        };
+
+       
+        let arena = Arena::new();
+        let root = parse_document(&arena, &blurb_src, &opts);
+        let mut blurb_html = Vec::new();
+        format_html(root, &opts, &mut blurb_html).unwrap();
+
+        posts.push(Post {
+            date,
+            title,
+            slug: slug_from_path(&file),
+            blurb: String::from_utf8(blurb_html).unwrap(),
+            tags,
+        });
+    }
+
+    
+    posts.sort_by(|a, b| {
+        let da = NaiveDate::parse_from_str(&a.date, "%Y-%m-%d")
+            .unwrap_or_else(|_| NaiveDate::from_ymd_opt(1970, 1, 1).unwrap());
+        let db = NaiveDate::parse_from_str(&b.date, "%Y-%m-%d")
+            .unwrap_or_else(|_| NaiveDate::from_ymd_opt(1970, 1, 1).unwrap());
+        db.cmp(&da)
+    });
+
+    BlogTemplate {
         year: Local::now().date_naive().year().to_string(),
-        posts: post_list,
+        posts,
+        path: EXE.to_string(),
         version: VERSION.to_string(),
         title: "Blog - Vishesh Choudhary".to_owned(),
+    }
+}
+
+#[get("/blog/<slug>")]
+fn get_blog(slug: String) -> Result<PostTemplate, Status> {
+    let path = POSTS_DIR.join(format!("{slug}.md"));
+    let content = read_to_string(&path)?;
+
+    
+    let mut type_mark = HashMap::new();
+    type_mark.insert("tags".into(), "array");
+
+    let meta = MetaData {
+        content,
+        required: vec![
+            "title".to_owned(),
+            "tags".to_owned(),
+            "date".to_owned(),
+            "blurb".to_owned(),
+        ],
+        type_mark,
     };
-    RawHtml(template.render().unwrap())
-}
 
-#[get("/blog/<file>")]
-fn get_blog(file: String) -> Result<RawHtml<String>, Status> {
-    let filename = format!("{}.md", file);
-    Posts::get(&filename).map_or_else(
-        || Err(Status::NotFound),
-        |d| {
-            let post_text = String::from_utf8(d.as_ref().to_vec()).unwrap();
-            let mut opts = ComrakOptions::default();
-            opts.extension = ComrakExtensionOptions {
-                strikethrough: true,
-                tagfilter: false,
-                table: true,
-                autolink: true,
-                tasklist: true,
-                superscript: false,
-                header_ids: Some("#".to_string()),
-                footnotes: false,
-                description_lists: false,
-                front_matter_delimiter: None,
-            };
-            opts.render.unsafe_ = true;
+    let (parsed_meta, body_md) = meta.parse().map_err(|_| Status::InternalServerError)?;
 
-            let arena = Arena::new();
-            let root = parse_document(&arena, &post_text, &opts);
-            iter_nodes(root, &|node| match &mut node.data.borrow_mut().value {
-                NodeValue::CodeBlock(ref mut block) => {
-                    let lang = String::from_utf8(block.info.clone()).unwrap();
-                    let code = String::from_utf8(block.literal.clone()).unwrap();
-                    block.literal = highlight_text(code, lang).as_bytes().to_vec();
-                }
-                _ => (),
-            });
+    let title = match parsed_meta["title"].clone() {
+        markdown_meta_parser::Value::String(t) => t,
+        _ => "".to_owned(),
+    };
 
-            let mut html = vec![];
-            format_html(root, &opts, &mut html).unwrap();
-            let template = PostTemplate {
-                year: Local::now().date_naive().year().to_string(),
-                post: String::from_utf8(html).unwrap(),
-                version: VERSION.to_string(),
-                title: file.splitn(2, '_').collect::<Vec<_>>()[1]
-                    .to_owned()
-                    .replace('-', " "),
-            };
-            Ok(RawHtml(template.render().unwrap()))
-        },
-    )
-}
+  
+    let opts = comrak_opts();
+    let arena = Arena::new();
+    let root = parse_document(&arena, &body_md, &opts);
 
-#[get("/static/<file..>")]
-fn public(file: PathBuf) -> Result<(ContentType, Vec<u8>), Status> {
-    let filename = file.display().to_string();
-    Static::get(&filename).map_or_else(
-        || Err(Status::NotFound),
-        |d| {
-            let ext = file
-                .as_path()
-                .extension()
-                .and_then(OsStr::to_str)
-                .ok_or(Status::BadRequest)?;
-            let content_type = ContentType::from_extension(ext).ok_or(Status::BadRequest)?;
-            Ok((content_type, d.to_vec()))
-        },
-    )
+    
+    iter_nodes(root, &|node| {
+      
+        let (lang_raw, code_opt): (String, Option<String>) = {
+            let borrowed = node.data.borrow(); // immutable borrow
+            if let NodeValue::CodeBlock(block) = &borrowed.value {
+                let lang = String::from_utf8(block.info.clone()).unwrap_or_default();
+                let code = String::from_utf8(block.literal.clone()).unwrap_or_default();
+                (lang, Some(code))
+            } else {
+                (String::new(), None)
+            }
+        }; 
+
+        if let Some(code) = code_opt {
+            let lang_norm = normalize_lang(&lang_raw);
+            let inner = highlight_text(code, lang_norm.clone()); // returns HTML spans etc.
+            let html = format!(
+                r#"<pre class="code-toolbar"><code class="language-{}">{}</code></pre>"#,
+                lang_norm, inner
+            );
+            node.data.borrow_mut().value = NodeValue::HtmlInline(html.into_bytes());
+        }
+    });
+
+    
+    let mut html = Vec::new();
+    format_html(root, &opts, &mut html).map_err(|_| Status::InternalServerError)?;
+
+    Ok(PostTemplate {
+        title,
+        year: Local::now().date_naive().year().to_string(),
+        post: String::from_utf8(html).unwrap(),
+        path: EXE.to_string(),
+        version: VERSION.to_string(),
+    })
 }
 
 #[get("/favicon.ico")]
-fn favicon() -> Result<(ContentType, Vec<u8>), Status> {
-    let icon = Static::get("favicon.ico").ok_or(Status::NotFound)?;
-    Ok((ContentType::Icon, icon.to_vec()))
+fn favicon() -> Option<(ContentType, Vec<u8>)> {
+    Static::get("favicon.ico").map(|icon| (ContentType::Icon, icon.data.into_owned()))
 }
 
-#[rocket::main]
-async fn main() -> Result<(), rocket::Error> {
-    let port: u16 = std::env::var("PORT")
-        .ok()
-        .and_then(|p| p.parse().ok())
-        .unwrap_or(8000);
-
-    let config = rocket::Config {
-        port,
-        address: std::net::Ipv4Addr::new(0, 0, 0, 0).into(),
-        ..rocket::Config::default()
-    };
-
-    let _rocket = rocket::custom(config)
-        .mount("/", routes!(index, public, blog, get_blog, favicon))
-        .ignite().await?
-        .launch().await?;
-
-    Ok(())
+#[rocket::launch]
+fn rocket() -> Rocket<Build> {
+    rocket::build()
+        .mount("/", rocket::routes![index, blog, get_blog, favicon])
+        // built-in static file server for /public
+        .mount("/static", FileServer::from("public"))
 }

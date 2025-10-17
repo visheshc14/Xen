@@ -123,3 +123,55 @@ h2::before,
 h3::before {
   content: none !important;
 }
+
+
+code {
+    padding: 0.2rem 0.2rem;
+    color: #c4b5fd;
+    font-size: 0.8rem;
+    background: #576268;
+    margin: 0 2px;
+    padding: 1px 6px;
+}
+
+.post-card:not(:last-of-type) {
+    border-bottom: 1px solid hsla(0, 0%, 100%, 0.1);
+}
+
+h2.post-title {
+    margin-bottom: 10px;
+}
+
+.post-date {
+    color: rgba(120, 226, 160, .7);
+    font-size: 1rem;
+    margin-bottom: 10px;
+}
+
+.post-meta {
+    margin-bottom: 10px;
+}
+
+.post-tags {
+    margin-bottom: 20px;
+    opacity: 0.8;
+}
+
+.post-tag:not(:first-of-type) {
+    margin-left: 8px;
+}
+
+.post-container a {
+    text-decoration: none;
+}
+
+.post-container {
+    background: #1f2233;
+}
+
+.post-content {
+    margin-top: 30px;
+    margin-bottom: 25px;
+    font-size: 0.9em;
+}
+
