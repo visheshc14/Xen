@@ -314,8 +314,19 @@ fn favicon() -> Option<(ContentType, Vec<u8>)> {
 
 #[rocket::launch]
 fn rocket() -> Rocket<Build> {
-    rocket::build()
+    // Bind correctly for Render (0.0.0.0 and PORT)
+    let port: u16 = std::env::var("PORT")
+        .ok()
+        .and_then(|p| p.parse().ok())
+        .unwrap_or(8000);
+
+    let config = rocket::Config {
+        address: std::net::Ipv4Addr::UNSPECIFIED.into(), // 0.0.0.0
+        port,
+        ..rocket::Config::default()
+    };
+
+    rocket::custom(config)
         .mount("/", rocket::routes![index, blog, get_blog, favicon])
-        // built-in static file server for /public
         .mount("/static", FileServer::from("public"))
 }
