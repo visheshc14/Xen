@@ -2,22 +2,52 @@ name: Deploy to Fly.io
 
 on:
   push:
-    branches: [main]
+    branches: [ main ]
   workflow_dispatch:
+
+permissions:
+  contents: read
+  deployments: write   # <-- needed to mark Production active
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
+    environment: Production   # <-- REQUIRED to read environment secrets
+
     steps:
       - uses: actions/checkout@v4
+
+      - name: Read Fly app name
+        id: meta
+        run: |
+          APP=$(sed -n 's/^app *= *"\(.*\)"/\1/p' fly.toml)
+          echo "app=$APP" >> "$GITHUB_OUTPUT"
+
+      - name: Start GitHub deployment
+        id: gh-deploy
+        uses: bobheadxi/deployments@v1
+        with:
+          step: start
+          token: ${{ secrets.GITHUB_TOKEN }}
+          env: Production
+          ref: ${{ github.ref }}
 
       - name: Install flyctl
         uses: superfly/flyctl-actions/setup-flyctl@v1
 
       - name: Deploy to Fly
         env:
+          # pulls from the **Production environment** secrets you just created
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
-        run: |
-          flyctl deploy --remote-only --strategy immediate
+        run: flyctl deploy --remote-only --detach -a ${{ steps.meta.outputs.app }}
+
+      - name: Finish GitHub deployment
+        if: always()
+        uses: bobheadxi/deployments@v1
+        with:
+          step: finish
+          token: ${{ secrets.GITHUB_TOKEN }}
+          env: Production
+          deployment_id: ${{ steps.gh-deploy.outputs.deployment_id }}
+          status: ${{ job.status }}
+          env_url: https://${{ steps.meta.outputs.app }}.fly.dev
