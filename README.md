@@ -5,15 +5,18 @@ This Project Serves as Both my Digital Identity and an Engineering Sandbox for E
 
 ---
 
-<img width="1357" height="907" alt="Screenshot 2025-10-03 at 3 30 43 PM" src="https://github.com/user-attachments/assets/820e9e71-74e4-41a5-8908-2d71b4fd1e9d" />
+![Screenshot 2025-10-20 at 7 53 31 PM](https://github.com/user-attachments/assets/d937e8f5-7e79-4633-9ea4-06bb38175cbe)
 
-<img width="1206" height="997" alt="Screenshot 2025-10-03 at 3 31 54 PM" src="https://github.com/user-attachments/assets/25de14e2-e5db-464f-90a2-61a34920bf7a" />
+![Screenshot 2025-10-20 at 7 54 01 PM](https://github.com/user-attachments/assets/92f2efed-5409-4761-956b-e31d09e8bdbc)
 
-<img width="1228" height="1005" alt="Screenshot 2025-10-03 at 3 32 07 PM" src="https://github.com/user-attachments/assets/1d1099a9-4dd5-4ebf-a603-bd38f1482217" />
+![Screenshot 2025-10-20 at 7 54 11 PM](https://github.com/user-attachments/assets/926f64f2-04d0-4c7c-97e5-1a847ded40e3)
 
-<img width="1281" height="982" alt="Screenshot 2025-10-03 at 3 36 32 PM" src="https://github.com/user-attachments/assets/f47e1326-9cf0-46e8-ae30-be468fcf1472" />
+![Screenshot 2025-10-20 at 7 54 21 PM](https://github.com/user-attachments/assets/5e09f597-a7c3-4c1c-8315-f8834bac13aa)
+
+![Screenshot 2025-10-20 at 7 53 49 PM](https://github.com/user-attachments/assets/8f4764ad-6fea-4619-875c-34b0758f3064)
 
 ---
+
 
 ##  Tech Stack  
 
