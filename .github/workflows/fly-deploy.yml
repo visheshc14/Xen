@@ -29,18 +29,33 @@ jobs:
       - name: Install flyctl
         uses: superfly/flyctl-actions/setup-flyctl@v1
 
-      # Deploy WITHOUT -a (flyctl reads fly.toml)
+      - name: Verify fly.toml and extract app name
+        id: meta
+        run: |
+          set -euo pipefail
+          test -f fly.toml || { echo "::error::fly.toml not found at repo root"; exit 1; }
+          APP=$(sed -n 's/^[[:space:]]*app[[:space:]]*=[[:space:]]*"\(.*\)".*/\1/p' fly.toml | head -n1)
+          if [ -z "$APP" ]; then
+            echo "::error::Missing or empty app = \"...\" in fly.toml"
+            exit 1
+          fi
+          echo "app=$APP" >> "$GITHUB_OUTPUT"
+          echo "Using Fly app: $APP"
+          echo "---- sanity search for stray '-a' flags in repo ----"
+          grep -R --line-number -- '-a ' || true
+
       - name: Deploy to Fly
         env:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
-        run: flyctl deploy --remote-only --detach
-
-      # (Optional) read app name from fly.toml to attach a nice env_url
-      - name: Read Fly app name
-        id: meta
         run: |
-          APP=$(awk -F'"' '/^\s*app\s*=\s*"/{print $2; exit}' fly.toml || true)
-          echo "app=$APP" >> "$GITHUB_OUTPUT"
+          set -euo pipefail
+          APP="${{ steps.meta.outputs.app }}"
+          flyctl version
+          flyctl deploy \
+            --remote-only \
+            --detach \
+            --config ./fly.toml \
+            --app "$APP"
 
       - name: Finish GitHub deployment
         if: always()
