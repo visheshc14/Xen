@@ -2,68 +2,22 @@ name: Deploy to Fly.io
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   workflow_dispatch:
-
-permissions:
-  contents: read
-  deployments: write
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    environment: Production
-
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@v4
 
-      - name: Start GitHub deployment
-        id: gh-deploy
-        uses: bobheadxi/deployments@v1
-        with:
-          step: start
-          token: ${{ secrets.GITHUB_TOKEN }}
-          env: Production
-          ref: ${{ github.ref }}
-
       - name: Install flyctl
         uses: superfly/flyctl-actions/setup-flyctl@v1
-
-      - name: Verify fly.toml and extract app name
-        id: meta
-        run: |
-          set -euo pipefail
-          test -f fly.toml || { echo "::error::fly.toml not found at repo root"; exit 1; }
-          APP=$(sed -n 's/^[[:space:]]*app[[:space:]]*=[[:space:]]*"\(.*\)".*/\1/p' fly.toml | head -n1)
-          if [ -z "$APP" ]; then
-            echo "::error::Missing or empty app = \"...\" in fly.toml"
-            exit 1
-          fi
-          echo "app=$APP" >> "$GITHUB_OUTPUT"
-          echo "Using Fly app: $APP"
-          echo "---- sanity search for stray '-a' flags in repo ----"
-          grep -R --line-number -- '-a ' || true
 
       - name: Deploy to Fly
         env:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
         run: |
-          set -euo pipefail
-          APP="${{ steps.meta.outputs.app }}"
-          flyctl version
-          flyctl deploy \
-            --remote-only \
-            --detach \
-            --config ./fly.toml \
-            --app "$APP"
-
-      - name: Finish GitHub deployment
-        if: always()
-        uses: bobheadxi/deployments@v1
-        with:
-          step: finish
-          token: ${{ secrets.GITHUB_TOKEN }}
-          env: Production
-          deployment_id: ${{ steps.gh-deploy.outputs.deployment_id }}
-          status: ${{ job.status }}
-          env_url: https://${{ steps.meta.outputs.app }}.fly.dev
+          flyctl deploy --remote-only --strategy immediate
