@@ -2,22 +2,53 @@ name: Deploy to Fly.io
 
 on:
   push:
-    branches: [main]
+    branches: [ main ]
   workflow_dispatch:
+
+permissions:
+  contents: read
+  deployments: write
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
+    environment: Production
+
     steps:
       - uses: actions/checkout@v4
+
+      - name: Start GitHub deployment
+        id: gh-deploy
+        uses: bobheadxi/deployments@v1
+        with:
+          step: start
+          token: ${{ secrets.GITHUB_TOKEN }}
+          env: Production
+          ref: ${{ github.ref }}
 
       - name: Install flyctl
         uses: superfly/flyctl-actions/setup-flyctl@v1
 
+      # Deploy WITHOUT -a (flyctl reads fly.toml)
       - name: Deploy to Fly
         env:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+        run: flyctl deploy --remote-only --detach
+
+      # (Optional) read app name from fly.toml to attach a nice env_url
+      - name: Read Fly app name
+        id: meta
         run: |
-          flyctl deploy --remote-only --strategy immediate
+          APP=$(awk -F'"' '/^\s*app\s*=\s*"/{print $2; exit}' fly.toml || true)
+          echo "app=$APP" >> "$GITHUB_OUTPUT"
+
+      - name: Finish GitHub deployment
+        if: always()
+        uses: bobheadxi/deployments@v1
+        with:
+          step: finish
+          token: ${{ secrets.GITHUB_TOKEN }}
+          env: Production
+          deployment_id: ${{ steps.gh-deploy.outputs.deployment_id }}
+          status: ${{ job.status }}
+          env_url: https://${{ steps.meta.outputs.app }}.fly.dev
