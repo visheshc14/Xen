@@ -1,13 +1,13 @@
 # Xen
 ---
-A Personal Portfolio Website and Blog CMS Built From Scratch with Rust, Rocket, Docker, JavaScript, HTML, Tailwind CSS, TeX, and Makefile Automation.
+A Personal Portfolio Website and Blog CMS Built From Scratch with Rust, Rocket, Docker, JavaScript, HTML and Tailwind CSS.
 This Project Serves as Both my Digital Identity and an Engineering Sandbox for Experimenting with Modern Backend, Frontend, and Deployment Workflows.
 
 ---
 
 ![Screenshot 2025-10-20 at 7 53 31 PM](https://github.com/user-attachments/assets/d937e8f5-7e79-4633-9ea4-06bb38175cbe)
 ---
-<img width="1158" height="874" alt="Screenshot 2025-10-21 at 12 16 24 PM" src="https://github.com/user-attachments/assets/376ccf01-92c0-4ce5-b0f3-272ac710e029" />
+<img width="1044" height="986" alt="Screenshot 2025-10-21 at 1 49 18 PM" src="https://github.com/user-attachments/assets/29596206-980c-4b8a-ba1d-6172577dec3e" />
 
 ---
 ![Screenshot 2025-10-20 at 7 54 11 PM](https://github.com/user-attachments/assets/926f64f2-04d0-4c7c-97e5-1a847ded40e3)
