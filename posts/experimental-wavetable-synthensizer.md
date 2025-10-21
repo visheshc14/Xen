@@ -2,7 +2,7 @@
 title: Project - Experimental Wavetable Synthensizer
 tags: [webassembly, rust, DSP, audioengineering, web-audio, wavetable-synthesizer]
 date: 2025-10-09
-blurb: "Aeon Keys is a full-stack audio synthesis project that i designed and implemented to explore the intersection of high-performance systems programming and creative audio technology. Inspired by industry-standard soft-synths like Xfer Serum, Aeon Keys reimagines a wavetable synthesizer as a browser-native application using rust, webassembly and the Web Audio API."
+blurb: "Aeon Keys is a Full-Stack Audio Synthesis Project that I Designed and Implemented to Explore the Intersection of High-Performance Systems Programming and Creative Audio Technology. Inspired by Industry-Standard Soft-Synths like Xfer Serum, Aeon Keys Reimagines a Wavetable Synthesizer as a Browser-Native Application using Rust, WebAssembly and the Web Audio API."
 ---
 
 #  Aeon Keys - Serum-Like Synthesizer 

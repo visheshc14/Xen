@@ -2,7 +2,7 @@
 title: A Gentle Introduction to Parser-Combinators
 tags: [parsers, combinators, parsing, rust, chumsky, AST, programming]
 date: 2023-07-31
-blurb: "Discover the fundamentals of parser-combinators, offering a gentle introduction to the art of parsing."
+blurb: "Discover the Fundamentals of Parser-Combinators, Offering a Gentle Introduction to the Art of Parsing."
 ---
 
 # A gentle introduction to parser-combinators
