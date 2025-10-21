@@ -6,11 +6,13 @@ This Project Serves as Both my Digital Identity and an Engineering Sandbox for E
 ---
 
 ![Screenshot 2025-10-20 at 7 53 31 PM](https://github.com/user-attachments/assets/d937e8f5-7e79-4633-9ea4-06bb38175cbe)
+---
+<img width="1158" height="874" alt="Screenshot 2025-10-21 at 12 16 24 PM" src="https://github.com/user-attachments/assets/376ccf01-92c0-4ce5-b0f3-272ac710e029" />
 
 ![Screenshot 2025-10-20 at 7 54 11 PM](https://github.com/user-attachments/assets/926f64f2-04d0-4c7c-97e5-1a847ded40e3)
-
+---
 ![Screenshot 2025-10-20 at 7 54 21 PM](https://github.com/user-attachments/assets/5e09f597-a7c3-4c1c-8315-f8834bac13aa)
-
+---
 ![Screenshot 2025-10-20 at 7 53 49 PM](https://github.com/user-attachments/assets/8f4764ad-6fea-4619-875c-34b0758f3064)
 
 ---
