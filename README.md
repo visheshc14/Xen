@@ -7,8 +7,6 @@ This Project Serves as Both my Digital Identity and an Engineering Sandbox for E
 
 ![Screenshot 2025-10-20 at 7 53 31 PM](https://github.com/user-attachments/assets/d937e8f5-7e79-4633-9ea4-06bb38175cbe)
 
-![Screenshot 2025-10-20 at 7 54 01 PM](https://github.com/user-attachments/assets/92f2efed-5409-4761-956b-e31d09e8bdbc)
-
 ![Screenshot 2025-10-20 at 7 54 11 PM](https://github.com/user-attachments/assets/926f64f2-04d0-4c7c-97e5-1a847ded40e3)
 
 ![Screenshot 2025-10-20 at 7 54 21 PM](https://github.com/user-attachments/assets/5e09f597-a7c3-4c1c-8315-f8834bac13aa)
