@@ -250,4 +250,3 @@ You should note that this implementation is a bit naive, and does not capture al
 
 Finally, I highly recommend checking out the rest of what the [analysis](https://pkg.go.dev/golang.org/x/tools/go/analysis) package can do. It’s quite powerful and convenient to use.
 
----
